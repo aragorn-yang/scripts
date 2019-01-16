@@ -40,7 +40,7 @@ on notify(successCount)
 end notify
 
 on notify_ay(notificationText)
-	set scriptTitle to "Send Current Chrome Tab to OmniFocus Inbox Task"
+	set scriptTitle to "Script complete"
 	set scriptSubTitle to "aragorn.yang@gmail.com"
 	display notification notificationText as text with title scriptTitle subtitle scriptSubTitle
 end notify_ay
