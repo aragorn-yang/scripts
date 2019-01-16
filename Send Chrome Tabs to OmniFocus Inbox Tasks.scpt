@@ -2,7 +2,7 @@
 -- OmniFocus > Send Chrome Tabs to OmniFocus Inbox Tasks
 -- Written By: Aragorn Yang <aragorn.yang@gmail.com>
 -- Version: 1.0 (2019.01.16)
--- Description: This script sends each of chrome tabs to OmniFocus Inbox as an individual task
+-- Description: This script sends each of Google Chrome tabs to an OmniFocus Inbox task
 
 -- UPDATE NOTICES
 -- ** Follow @AragornYang on Twitter for Update Notices! **
@@ -10,7 +10,7 @@
 -- CHANGELOG
 -- 1.00 - Initial release
 
-my main()
+main()
 
 on main()
 	set tabList to {}
@@ -21,44 +21,42 @@ on main()
 		set tabCount to (count of (tabs of chromeWindow))
 		set successCount to 0
 		
-		--try
 		repeat with t in (tabs of chromeWindow)
 			copy {tabTitle:(title of t), tabURL:(URL of t)} to the end of tabList
 		end repeat
-		--end try
 	end tell
 	
 	tell front document of application "OmniFocus"
 		repeat with tab in tabList
-			make new inbox task with properties {name:(tabTitle of tab) as text, note:(tabURL of tab) as text}
+			set theName to (tabTitle of tab) as text
+			set theURL to (tabURL of tab) as text
+			make new inbox task with properties {name:("READ " & theName), note:theURL}
 			--INCREMENT SUCCESS COUNT
 			set successCount to (successCount + 1)
 		end repeat
 	end tell
 	
-	my notify(successCount, tabCount)
+	notify(successCount, tabCount)
 end main
 
-on notify(successCount, itemNum)
+on notify(successCount, tabCount)
 	set scriptTitle to "Send Chrome Tabs to OmniFocus Inbox Tasks"
 	set scriptSubTitle to "aragorn.yang@gmail.com"
 	set Plural_Test to (successCount) as number
 	
 	if Plural_Test is -1 then
-		display notification "No Tabs Exported!" with title scriptTitle subtitle scriptSubTitle
-		
+		notify_ay("No Tabs Exported!")
 	else if Plural_Test is 0 then
-		display notification "No Tabs Exported!" with title scriptTitle subtitle scriptSubTitle
-		
+		notify_ay("No Tabs Exported!")
 	else if Plural_Test is equal to 1 then
-		display notification "Successfully Exported " & itemNum & ¬
-			" Tab to OmniFocus" with title scriptTitle subtitle scriptSubTitle
-		
+		notify_ay("Successfully Exported " & tabCount & " Tab to OmniFocus")
 	else if Plural_Test is greater than 1 then
-		display notification "Successfully Exported " & itemNum & ¬
-			" Tabs to OmniFocus" with title scriptTitle subtitle scriptSubTitle
+		notify_ay("Successfully Exported " & tabCount & " Tabs to OmniFocus")
 	end if
-	
-	set itemNum to "0"
-	delay 1
 end notify
+
+on notify_ay(notificationText)
+	set scriptTitle to "Send Current Chrome Tab to OmniFocus Inbox Task"
+	set scriptSubTitle to "aragorn.yang@gmail.com"
+	display notification notificationText with title scriptTitle subtitle scriptSubTitle
+end notify_ay
