@@ -1,0 +1,124 @@
+/*{
+	"type": "action",
+	"targets": ["omnifocus"],
+	"author": "Aragorn Yang",
+	"identifier": "com.omni-automation.of.push-out-defer-due-dates",
+	"version": "1.2",
+	"description": "Will add number of days to the defer/due date of each selected project/task.",
+	"label": "Push Out Project/Task Defer/Due Dates",
+	"shortLabel": "Push D/D Dates"
+}*/
+(() => {
+    var action = new PlugIn.Action(function (selection, sender) {
+        // action code
+        // selection options: tasks, projects, folders, tags
+
+        var dayIndexes = []
+        var dayIndexStrings = []
+        var dayIndexesActualDays = []
+        dayIndexes.push(0);
+        dayIndexStrings.push('1 day');
+        dayIndexesActualDays.push(1);
+        dayIndexes.push(1);
+        dayIndexStrings.push('2 days');
+        dayIndexesActualDays.push(2);
+        dayIndexes.push(2);
+        dayIndexStrings.push('1 week');
+        dayIndexesActualDays.push(7);
+        dayIndexes.push(3);
+        dayIndexStrings.push('4 weeks');
+        dayIndexesActualDays.push(28);
+
+        var inputForm = new Form()
+        inputForm.addField(new Form.Field.Option(
+            "dayMenu",
+            null,
+            dayIndexes,
+            dayIndexStrings,
+            0
+        ))
+        inputForm.addField(new Form.Field.Checkbox(
+            "shouldIncludeDefers",
+            "Push out deferment dates",
+            true
+        ))
+        inputForm.addField(new Form.Field.Checkbox(
+            "shouldIncludeDues",
+            "Push out due dates",
+            true
+        ))
+        inputForm.addField(new Form.Field.Checkbox(
+            "forceNewDates",
+            "Consider empty dates as today",
+            false
+        ))
+        var formPrompt = "Number of days to add to defer/due dates:"
+        var buttonTitle = "OK"
+        var formPromise = inputForm.show(formPrompt, buttonTitle)
+
+        inputForm.validate = function (formObject) {
+            return true
+        }
+
+        formPromise.then(function (formObject) {
+            var dayMenuIndex = formObject.values["dayMenu"]
+            var pushoutDuration = dayIndexesActualDays[dayMenuIndex]
+            var shouldIncludeDefers = formObject.values["shouldIncludeDefers"]
+            var shouldIncludeDues = formObject.values["shouldIncludeDues"]
+            var forceNewDates = formObject.values["forceNewDates"]
+            var cal = Calendar.current
+            var dc = new DateComponents()
+            dc.day = pushoutDuration
+            var pushDeferDate = item => {
+                var currentDate = item.deferDate
+                if (!currentDate && forceNewDates) {
+                    currentDate = new Date()
+                    currentDate.setHours(6, 0, 0, 0)
+                }
+                if (currentDate) {
+                    item.deferDate = cal.dateByAddingDateComponents(currentDate, dc)
+                }
+            }
+            var pushDueDate = item => {
+                var currentDate = item.dueDate
+                if (!currentDate && forceNewDates) {
+                    currentDate = new Date()
+                    currentDate.setHours(22, 0, 0, 0)
+                }
+                if (currentDate) {
+                    item.dueDate = cal.dateByAddingDateComponents(currentDate, dc)
+                }
+            }
+
+            var pushProject = proj => {
+                if (shouldIncludeDefers) {
+                    pushDeferDate(proj.task)
+                }
+                if (shouldIncludeDues) {
+                    pushDueDate(proj.task)
+                }
+            }
+
+            var pushTask = item => {
+                if (shouldIncludeDefers) {
+                    pushDeferDate(item)
+                }
+                if (shouldIncludeDues) {
+                    pushDueDate(item)
+                }
+            }
+
+
+            selection.projects.forEach(pushProject)
+            selection.tasks.forEach(pushTask)
+        })
+    });
+
+    action.validate = function (selection, sender) {
+        // validation code
+        // selection options: tasks, projects, folders, tags
+        return (selection.projects.length > 0 || selection.tasks.length > 0)
+    };
+
+    return action;
+})();
