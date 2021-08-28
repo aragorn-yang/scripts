@@ -13,24 +13,24 @@
         // action code
         // selection options: tasks, projects, folders, tags
 
+        var dayChoices = [
+            {label: "-1 day", days: -1,},
+            {label: "0 day", days: 0,},
+            {label: "1 day", days: 1,},
+            {label: "2 days", days: 2,},
+            {label: "1 week", days: 7,},
+            {label: "4 weeks", days: 28,},
+        ];
+
         var dayIndexes = []
         var dayIndexStrings = []
         var dayIndexesActualDays = []
-        dayIndexes.push(0);
-        dayIndexStrings.push('0 day');
-        dayIndexesActualDays.push(0);
-        dayIndexes.push(1);
-        dayIndexStrings.push('1 day');
-        dayIndexesActualDays.push(1);
-        dayIndexes.push(2);
-        dayIndexStrings.push('2 days');
-        dayIndexesActualDays.push(2);
-        dayIndexes.push(3);
-        dayIndexStrings.push('1 week');
-        dayIndexesActualDays.push(7);
-        dayIndexes.push(4);
-        dayIndexStrings.push('4 weeks');
-        dayIndexesActualDays.push(28);
+
+        dayChoices.forEach(function (dayChoice, index) {
+            dayIndexes.push(index);
+            dayIndexStrings.push(dayChoice.label);
+            dayIndexesActualDays.push(dayChoice.days);
+        });
 
         var inputForm = new Form()
         inputForm.addField(new Form.Field.Option(
@@ -38,7 +38,7 @@
             null,
             dayIndexes,
             dayIndexStrings,
-            0
+            dayIndexesActualDays.indexOf(1)
         ))
         inputForm.addField(new Form.Field.Checkbox(
             "shouldIncludeDefers",
